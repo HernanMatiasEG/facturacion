@@ -31,8 +31,6 @@ class FacturacionController extends Controller
         $data = $request->data;
 
         if(isset($data["id_cliente"]) && $data["id_cliente"] > 0){
-            Factura::truncate();
-            FacturaDetalle::truncate();
             $factura = new Factura;
             $factura->id_cliente = $data["id_cliente"];
             $factura->observacion = $data["observacion"] ?? null;

@@ -6,6 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Facturación - AC Farma</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        .detalleFactura{
+            transition: 2s;
+        }
+    </style>
 </head>
 <body>
     
@@ -208,14 +213,15 @@
         </div>
         <div class="mt-4">
             <h4>Facturas</h4>
-            <table class="table">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">Id Factura</th>
                         <th scope="col">Cliente</th>
-                        <th scope="col">Total</th>
                         <th scope="col">Fecha</th>
                         <th scope="col">Observación</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Detalle</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -225,12 +231,38 @@
                         <tr>
                             <td>{{ $factura->id_factura }}</td>
                             <td>{{ $cliente->nombres.' '.$cliente->apellidos }}</td>
-                            <td>{{ $factura->total }}</td>
                             <td>{{ $factura->fecha }}</td>
                             <td>{{ $factura->observacion }}</td>
+                            <td>{{ $factura->total }}</td>
+                            <td> <a class="btn btn-link" data-bs-toggle="collapse" href="#collapseDetalleFactura_{{ $factura->id_factura }}" role="button" aria-expanded="false" aria-controls="collapseDetalleFactura_{{ $factura->id_factura }}"><svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/></svg></a></td>
                         </tr>
-                        @foreach($data->facturas_detalle->where('id_factura',$factura->id_factura) as $factura_detalle)
                         
+                        <tr class="">
+                            <td colspan="6" class="p-0">
+                                <div class="collapse p-2" id="collapseDetalleFactura_{{ $factura->id_factura }}">
+                                    <table class="table">
+                                            <thead>
+                                                <th>Codigo</th>
+                                                <th>Descripcion</th>
+                                                <th>Costo unitario</th>
+                                                <th>Cantidad</th>
+                                                <th>Total</th>
+                                            </thead>
+                                            @foreach($data->facturas_detalle->where('id_factura',$factura->id_factura) as $factura_detalle)
+                                            @php $producto = $data->productos->where('id_producto',$factura_detalle->id_producto)->first(); @endphp
+                                            <tr>
+                                                <td>{{ $producto->codigo }}</td>
+                                                <td>{{ $producto->descripcion }}</td>
+                                                <td>{{ $producto->precio }}</td>
+                                                <td>{{ $factura_detalle->cantidad }}</td>
+                                                <td>{{ $factura_detalle->total }}</td>
+                                            </tr>
+                                            @endforeach
+                                    </table>
+                                </div>
+                            </td>
+                                    
+                        </tr>
                     @endforeach
         
                 </tbody>
@@ -389,6 +421,13 @@
  
 
         });
+
+        $(document).on('click','.verDetalleFactura',function(e){
+            e.preventDefault();
+            var id_factura = $(this).attr('data-facturaId');
+            $('.detalleFactura_'+id_factura).toggleClass('d-none');
+
+        })
 
         function getTotal(){
             var table = $('#tableProductos');
